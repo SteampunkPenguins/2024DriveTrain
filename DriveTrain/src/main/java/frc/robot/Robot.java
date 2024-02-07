@@ -21,18 +21,30 @@ import edu.wpi.first.cameraserver.CameraServer;
 import java.security.Key;
 // Imports for NavX
 import com.kauailabs.navx.frc.AHRS;
+// Shuffleboard Variables 
 
 
-public class Robot extends TimedRobot {
+//encoders?
+import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.PWM;
 
+
+
+public class Robot extends TimedRobot { 
+
+  private final String kDefaultAuto
   private final CANSparkMax frontLeft = new CANSparkMax(8, MotorType.kBrushless); //CAN ID is set on the sparkmax 
   private final CANSparkMax backLeft = new CANSparkMax(1, MotorType.kBrushless); // Motortype must also be set for the neo it is brushless.
   private final CANSparkMax frontRight = new CANSparkMax(2, MotorType.kBrushless);
   private final CANSparkMax backRight = new CANSparkMax(3, MotorType.kBrushless);
-  // In our code for last year we used motorcontrol groups. That has been discontinued. We now must use 'follow' to link the two motors.
+  // In our code for last year we used motor control groups. That has been discontinued. We now must use 'follow' to link the two motors.
   private final DifferentialDrive yangMobile = new DifferentialDrive(frontLeft,frontRight); // Differential drive is the main object to control the drivetrain.
   // For now we have one controller created for a driver.
   private final XboxController driver = new XboxController(0);
+
+  //encoder??
+  double diameter = 6/12; //6 inch wheels
+  double dist = 0.5*3.14/1024; //feet per pulse
 
   @Override
   public void robotInit() {
@@ -49,12 +61,25 @@ public class Robot extends TimedRobot {
 
   }
   public void autonomousInit() {
-   
-  }
+    m_timer.reset();
+    m_timer.starter();
+    //go backwards
+    frontLeft.setInverted(true);
+    frontRight.setInverted(false);
+    
+    m_autoSelected = m_chooser.getSelected();
+   // for smart dashboard 
+    m_autoSelected = SmartDashboard.getString("Auto Seletor ", kDefaultAuto ) ;
+    System.out.println( "Auto selected:" + m_autoSelected) ; 
+
 
   @Override
   public void autonomousPeriodic() {
-    
+    if (m_timer.get() >0) && (m_timer.get() <5){ 
+      //THE FIVE SECONDS ARE CHANGEABLE
+      yangMobile.arcadeDrive (0.5, 0.0, isAutonomous());
+    else {yangMobile.stopMotor();}
+      }
   }
   @Override
   public void teleopInit() {
